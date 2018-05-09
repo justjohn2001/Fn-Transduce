@@ -231,7 +231,7 @@ sub transduce_default {
   my ($transducer, $reducer, @values) = @_;
 
   my $trans_fn = $transducer->($reducer);
-  return $trans_fn->(reduce {$trans_fn->($a, $b)} $reducer->(), @values);
+  return $trans_fn->(reduce {$trans_fn->($a, $b)} $trans_fn->(), @values);
 }
 
 =head2 comp
