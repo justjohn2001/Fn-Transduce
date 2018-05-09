@@ -202,7 +202,7 @@ if you don't export anything, such as for a purely object-oriented module.
 =cut
 
 use Exporter 'import';
-our @EXPORT_OK = qw(transduce comp map_t grep_t conj_r sum_r);
+our @EXPORT_OK = qw(transduce comp map_t grep_t);
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
 =head1 SUBROUTINES/METHODS
@@ -304,7 +304,7 @@ sub grep_t (&) {
 
 =head1 AUTHOR
 
-John Miller, C<< <john at onejohn.org> >>
+John Miller, C<< <john-cpan at onejohn.org> >>
 
 =head1 BUGS
 
@@ -322,7 +322,7 @@ You can find documentation for this module with the perldoc command.
     perldoc Fn::Transduce
 
 
-You can also look for information at:
+You can also look for information at: L<https://github.com/justjohn2001/Fn-Transduce>
 
 =over 4
 
