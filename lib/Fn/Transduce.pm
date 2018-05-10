@@ -202,7 +202,7 @@ if you don't export anything, such as for a purely object-oriented module.
 =cut
 
 use Exporter 'import';
-our @EXPORT_OK = qw(transduce comp map_t grep_t);
+our @EXPORT_OK = qw(transduce comp map_t grep_t filter_t);
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
 =head1 SUBROUTINES/METHODS
@@ -245,7 +245,7 @@ ever more complex transformations.
 sub comp {
   my @transducers = @_;
 
-  return @transducers if @transducers == 1;
+  return shift if @transducers == 1;
 
   return sub {
     my ($rf) = @_;
@@ -271,7 +271,6 @@ sub map_t (&) {
             return $rf->() if @_ == 0;
             return $rf->(@_) if @_ == 1;
 
-            local ($a, $b);
             my ($acc, $i) = @_;
             local $_ = $i;
             return $rf->($acc, $code->($_));
@@ -301,6 +300,11 @@ sub grep_t (&) {
     }
 }
 
+=head2 filter_t
+filter_t is an alias for grep_t, named in more common nomenclature.
+=cut
+
+*filter_t = \&grep_t;
 
 =head1 AUTHOR
 
