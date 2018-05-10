@@ -26,7 +26,7 @@ my $sum_reducer = sub {
   return $acc + $i;
 };
 
-my $conj = sub {
+my $conj_reducer = sub {
     return [] if @_ == 0;
     return shift if @_ == 1;
 
@@ -65,14 +65,14 @@ is(ref comp($inc), 'CODE', 'comp returns a sub when passed one code ref');
 
 my $c = comp($evens, $inc);
 is(ref comp($inc), 'CODE', 'comp returns a sub when passed 2 code refs');
-is_deeply(transduce($c, $conj, [], 1..5), [3, 5],
+is_deeply(transduce($c, $conj_reducer, [], 1..5), [3, 5],
           'transduce on comped transducers returns the composite result');
 
 my $c2 = comp($evens, $inc, $inc, $evens, $evens, $inc);
-is_deeply(transduce($c2, $conj, [], 1..5), [5, 7],
+is_deeply(transduce($c2, $conj_reducer, [], 1..5), [5, 7],
           'comp with more than 2 transducers works as expected');
 
 my $c3 = comp($c, $inc, $c2);
-is_deeply(transduce($c3, $conj, [], 1..5), [7, 9],
+is_deeply(transduce($c3, $conj_reducer, [], 1..5), [7, 9],
           'comp with comped transducers work');
 
