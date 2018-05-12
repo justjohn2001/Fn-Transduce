@@ -54,25 +54,25 @@ is($evens_r->(3), 3, "evens_r doesn't filter the accumulation when called with 1
 is($evens_r->(2, 2), 4, 'evens_r passes even value to the reducer');
 is($evens_r->(2, 3), 2, 'evens_r returns the accumulation when the item is odd');
 
-is(transduce($inc, $sum_reducer, 0, 1..5), 20,
+is(transduce($inc, $sum_reducer, 1..5), 20,
    'transduce on inc returns sum of incremented values');
-is(transduce($evens, $sum_reducer, 0, 1..5), 6,
+is(transduce($evens, $sum_reducer, 1..5), 6,
    'transducer on evens returns sum of even values');
-is(transduce($inc, $sum_reducer, 20, 1..5), 40,
-   'transducer uses init value as base for sum');
+is(transduce_init($inc, $sum_reducer, 20, 1..5), 40,
+   'transduce_init uses init value as base for sum');
 
 is(ref comp($inc), 'CODE', 'comp returns a sub when passed one code ref');
 
 my $c = comp($evens, $inc);
 is(ref comp($inc), 'CODE', 'comp returns a sub when passed 2 code refs');
-is_deeply(transduce($c, $conj_reducer, [], 1..5), [3, 5],
+is_deeply(transduce($c, $conj_reducer, 1..5), [3, 5],
           'transduce on comped transducers returns the composite result');
 
 my $c2 = comp($evens, $inc, $inc, $evens, $evens, $inc);
-is_deeply(transduce($c2, $conj_reducer, [], 1..5), [5, 7],
+is_deeply(transduce($c2, $conj_reducer, 1..5), [5, 7],
           'comp with more than 2 transducers works as expected');
 
 my $c3 = comp($c, $inc, $c2);
-is_deeply(transduce($c3, $conj_reducer, [], 1..5), [7, 9],
+is_deeply(transduce($c3, $conj_reducer, 1..5), [7, 9],
           'comp with comped transducers work');
 

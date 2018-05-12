@@ -48,13 +48,13 @@ be read backwards to be understood.
     my $transducer = map_t {$_ + 1};
     my $reducer = \&conj_r;
 
-    my $result = transduce($transducer, $reducer, [], 1..10);
+    my $result = transduce($transducer, $reducer, 1..10);
     # => [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
     my $composite_transducer = comp(map_t {$_ + 1},
                                     grep_t {$_ % 2 == 0},
                                     map_t {$_ * 2});
-    my $result2 = transduce($composite_transducer, \&sum_r, 0, 1..10);
+    my $result2 = transduce($composite_transducer, \&sum_r, 1..10);
     # => 60
 
     # Compare this to standard maps and greps:
@@ -151,7 +151,7 @@ reducing function adds the item to an array:
     }
 
 This must be passed by reference to transduce:
-    transduce($transducer, \&to_array_r, [], @list);
+    transduce($transducer, \&to_array_r, @list);
 
 It may be simplified by having the function return a reference to the
 actual reducing function.
@@ -167,7 +167,7 @@ actual reducing function.
     }
 
 This can be called more clearly:
-    transduce($transducer, to_array_r, [], @list);
+    transduce($transducer, to_array_r, @list);
 
 Some reducing functions close over some state (such as a file handle or
 other output descriptor) and this type of definition works well for them
@@ -188,11 +188,7 @@ too.
       }
     }
 
-    transduce($transducer, to_file_r("test.txt"), to_file_r()->(), @list);
-
-I have called transduce with the default value for the to_file_r reducer to
-initialize the transduction with the file handle.
-TODO: create transduce_default that does that.
+    transduce($transducer, to_file_r("test.txt"), @list);
 
 =head1 EXPORT_OK
 
@@ -202,36 +198,35 @@ if you don't export anything, such as for a purely object-oriented module.
 =cut
 
 use Exporter 'import';
-our @EXPORT_OK = qw(transduce comp map_t grep_t filter_t);
+our @EXPORT_OK = qw(transduce transduce_init comp map_t grep_t filter_t);
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
 =head1 SUBROUTINES/METHODS
 
 =head2 transduce
-This is how you execute a transducer. You pass it the transducer,
-the reducing function, an inital value, and the list of values
-to act upon. It returns the result of the reducing function acting
-on all of the transduced values.
+This is how you execute a transducer. You pass it the transducer, the reducing
+function, and the list of values to act upon. It returns the result of the
+reducing function acting on all of the transduced values.
 
-If you want the inital value to be the default value for the reducing
-function, call transduce_default.
+If you want to specify an inital value for the reducing function, call
+transduce_init.
 
 =cut
 
 use List::Util qw(reduce);
 
 sub transduce {
+  my ($transducer, $reducer, @values) = @_;
+
+  my $trans_fn = $transducer->($reducer);
+  return transduce_init($transducer, $reducer, $trans_fn->(), @values);
+}
+
+sub transduce_init {
   my ($transducer, $reducer, $init, @values) = @_;
 
   my $trans_fn = $transducer->($reducer);
   return $trans_fn->(reduce {$trans_fn->($a, $b)} $init, @values);
-}
-
-sub transduce_default {
-  my ($transducer, $reducer, @values) = @_;
-
-  my $trans_fn = $transducer->($reducer);
-  return $trans_fn->(reduce {$trans_fn->($a, $b)} $trans_fn->(), @values);
 }
 
 =head2 comp
