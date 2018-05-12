@@ -4,7 +4,7 @@ use strict;
 use warnings FATAL => 'all';
 use Test::More;
 
-plan tests => 20;
+plan tests => 21;
 
 use Fn::Transduce qw(:all);
 
@@ -24,15 +24,6 @@ my $sum_reducer = sub {
   return shift if @_ == 1;
   my ($acc, $i) = @_;
   return $acc + $i;
-};
-
-my $conj_reducer = sub {
-    return [] if @_ == 0;
-    return shift if @_ == 1;
-
-    my ($acc, $i) = @_;
-    push @$acc, $i;
-    return $acc;
 };
 
 my $inc_r = $inc->($sum_reducer);
@@ -63,6 +54,15 @@ is(transduce_init($inc, $sum_reducer, 20, 1..5), 40,
 
 is(ref comp($inc), 'CODE', 'comp returns a sub when passed one code ref');
 
+my $conj_reducer = sub {
+    return [] if @_ == 0;
+    return shift if @_ == 1;
+
+    my ($acc, $i) = @_;
+    push @$acc, $i;
+    return $acc;
+};
+
 my $c = comp($evens, $inc);
 is(ref comp($inc), 'CODE', 'comp returns a sub when passed 2 code refs');
 is_deeply(transduce($c, $conj_reducer, 1..5), [3, 5],
@@ -75,4 +75,7 @@ is_deeply(transduce($c2, $conj_reducer, 1..5), [5, 7],
 my $c3 = comp($c, $inc, $c2);
 is_deeply(transduce($c3, $conj_reducer, 1..5), [7, 9],
           'comp with comped transducers work');
+
+is(transduce(filter_t {$_ % 2 == 0}, $sum_reducer, 1..5), 6,
+   'filter_t works the same as grep_t');
 
