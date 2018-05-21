@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 
 use Exporter 'import';
 our @EXPORT_OK = qw(conj_r sum_r max_r min_r);
+our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
 sub conj_r {
     return sub {
